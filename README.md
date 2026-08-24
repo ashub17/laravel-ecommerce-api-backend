@@ -1,59 +1,354 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛒 Laravel E-commerce API Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A scalable and maintainable **E-commerce REST API** built with Laravel, following **MVC, OOP, and Service-Repository architecture**.
+Designed to power a Vue.js admin panel and storefront frontend.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🔐 Authentication & Authorization
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* Laravel Sanctum token-based authentication
+* Register / Login / Logout
+* Protected routes with `auth:sanctum`
+* Role-based access (`admin` vs `user`)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 📂 Categories
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* Admin CRUD operations
+* Public category listing
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 🛍️ Products
 
-### Premium Partners
+* Full CRUD (admin)
+* Slug-based product URLs
+* Featured image + gallery images
+* Stock management
+* Price & sale price support
+* Pagination & filtering ready
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+### 🛒 Cart System
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+* One cart per user
+* Add / update / remove items
+* Auto price snapshot
+* Stock validation
+* Cart subtotal & total items
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 📦 Orders & Checkout
 
-## Security Vulnerabilities
+* Checkout from cart
+* Shipping & billing addresses
+* Order item snapshot (price locked)
+* Stock deduction
+* Cart auto-clear after checkout
+* Customer order history
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+### 🧾 Admin Order Management
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* View all orders
+* View single order
+* Update order status
+* Update payment status
+
+---
+
+### 🧱 Content Management System (CMS)
+
+#### Banners
+
+* Create / update / delete banners
+* Image upload support
+* Sort order + active toggle
+
+#### Content Blocks
+
+* Dynamic content via unique keys
+* JSON meta support
+* Used for homepage, footer, etc.
+
+---
+
+### 📊 Admin Dashboard
+
+* Total users
+* Total products
+* Total categories
+* Total orders
+* Total revenue
+* Low stock products
+* Recent orders
+* Top selling products
+
+---
+
+## 🧠 Architecture
+
+This project follows clean architecture principles:
+
+* MVC (Model-View-Controller)
+* Service Layer (business logic)
+* Repository Layer (data access)
+* Form Requests (validation)
+* Eloquent ORM
+* RESTful API design
+
+---
+
+## 🛠️ Tech Stack
+
+* Laravel 12+
+* PHP 8.2+
+* MySQL
+* Laravel Sanctum
+* Eloquent ORM
+* Storage (public disk)
+
+---
+
+## 📁 Project Structure (Key Parts)
+
+```text
+app/
+ ├── Http/
+ │   ├── Controllers/
+ │   │   ├── Api/
+ │   │   └── Admin/
+ │   ├── Requests/
+ │
+ ├── Models/
+ ├── Services/
+ ├── Repositories/
+
+routes/
+ ├── api.php
+
+storage/
+ └── app/public/
+```
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone project
+
+```bash
+git clone <your-repo-url>
+cd ecommerce-api
+```
+
+### 2. Install dependencies
+
+```bash
+composer install
+```
+
+### 3. Setup environment
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+### 4. Configure database
+
+Edit `.env`:
+
+```env
+DB_DATABASE=your_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 5. Run migrations
+
+```bash
+php artisan migrate
+```
+
+### 6. Storage link
+
+```bash
+php artisan storage:link
+```
+
+### 7. Run server
+
+```bash
+php artisan serve
+```
+
+---
+
+## 🔑 Authentication
+
+Use Bearer token in headers:
+
+```text
+Authorization: Bearer YOUR_TOKEN
+Accept: application/json
+```
+
+---
+
+## 📡 API Overview
+
+### Auth
+
+```text
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/me
+POST   /api/auth/logout
+```
+
+---
+
+### Products
+
+```text
+GET    /api/products
+GET    /api/products/{slug}
+```
+
+---
+
+### Categories
+
+```text
+GET    /api/categories
+```
+
+---
+
+### Cart
+
+```text
+GET    /api/cart
+POST   /api/cart
+PUT    /api/cart/{id}
+DELETE /api/cart/{id}
+DELETE /api/cart
+```
+
+---
+
+### Orders (User)
+
+```text
+POST   /api/orders
+GET    /api/orders
+GET    /api/orders/{id}
+```
+
+---
+
+### Admin Routes
+
+(All require admin role)
+
+#### Categories & Products
+
+```text
+/api/admin/categories
+/api/admin/products
+```
+
+#### Orders
+
+```text
+GET    /api/admin/orders
+GET    /api/admin/orders/{order}
+PUT    /api/admin/orders/{order}
+```
+
+#### Dashboard
+
+```text
+GET    /api/admin/dashboard
+```
+
+#### Banners
+
+```text
+/api/admin/banners
+```
+
+#### Content Blocks
+
+```text
+/api/admin/content-blocks
+```
+
+---
+
+### Public CMS
+
+```text
+GET /api/banners
+GET /api/content-blocks
+GET /api/content-blocks/{key}
+```
+
+---
+
+## 🖼️ File Storage
+
+Uploaded files are stored in:
+
+```text
+storage/app/public/
+```
+
+Accessible via:
+
+```text
+http://127.0.0.1:8000/storage/...
+```
+
+---
+
+## 🧪 Testing
+
+Use Postman or any API client.
+
+Make sure to:
+
+* Include `Accept: application/json`
+* Include Bearer token for protected routes
+
+---
+
+## 📌 Future Improvements
+
+* Payment integration (Stripe / SSLCommerz)
+* Wishlist system
+* Product reviews & ratings
+* Advanced search & filters
+* Notifications (email/SMS)
+* API Resource transformers
+* Caching (Redis)
+
+---
+
+## 🤝 Contribution
+
+Feel free to fork and extend the project.
+
+---
+
+## 📄 License
+
+This project is open-source and available under the MIT License.
