@@ -125,9 +125,7 @@ class OrderService
         $order = $this->orderRepository->findForUser($user, $orderId);
 
         if (!$order) {
-            throw ValidationException::withMessages([
-                'order' => ['Order not found.'],
-            ]);
+            abort(404, 'Order not found.');
         }
 
         return $order;
@@ -143,9 +141,7 @@ class OrderService
         $order = $this->orderRepository->findForAdmin($orderId);
 
         if (!$order) {
-            throw ValidationException::withMessages([
-                'order' => ['Order not found.'],
-            ]);
+            abort(404, 'Order not found.');
         }
 
         return $order;
