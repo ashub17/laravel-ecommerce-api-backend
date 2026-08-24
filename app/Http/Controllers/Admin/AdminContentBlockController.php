@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreContentBlockRequest;
 use App\Http\Requests\UpdateContentBlockRequest;
+use App\Http\Resources\ContentBlockResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\ContentBlock;
 use App\Repositories\ContentBlockRepository;
 use App\Services\ContentBlockService;
@@ -23,10 +25,11 @@ class AdminContentBlockController extends Controller
     {
         $perPage = (int) $request->integer('per_page', 15);
 
-        return response()->json([
-            'message' => 'Content blocks fetched successfully.',
-            'data' => $this->contentBlockRepository->paginate($perPage),
-        ]);
+        return ApiResponse::paginated(
+            $this->contentBlockRepository->paginate($perPage),
+            ContentBlockResource::class,
+            'Content blocks fetched successfully.'
+        );
     }
 
     public function store(StoreContentBlockRequest $request): JsonResponse
@@ -39,18 +42,19 @@ class AdminContentBlockController extends Controller
 
         $contentBlock = $this->contentBlockService->create($data);
 
-        return response()->json([
-            'message' => 'Content block created successfully.',
-            'data' => $contentBlock,
-        ], 201);
+        return ApiResponse::item(
+            new ContentBlockResource($contentBlock),
+            'Content block created successfully.',
+            201
+        );
     }
 
     public function show(ContentBlock $content_block): JsonResponse
     {
-        return response()->json([
-            'message' => 'Content block fetched successfully.',
-            'data' => $content_block,
-        ]);
+        return ApiResponse::item(
+            new ContentBlockResource($content_block),
+            'Content block fetched successfully.'
+        );
     }
 
     public function update(UpdateContentBlockRequest $request, ContentBlock $content_block): JsonResponse
@@ -63,18 +67,16 @@ class AdminContentBlockController extends Controller
 
         $contentBlock = $this->contentBlockService->update($content_block, $data);
 
-        return response()->json([
-            'message' => 'Content block updated successfully.',
-            'data' => $contentBlock,
-        ]);
+        return ApiResponse::item(
+            new ContentBlockResource($contentBlock),
+            'Content block updated successfully.'
+        );
     }
 
     public function destroy(ContentBlock $content_block): JsonResponse
     {
         $this->contentBlockService->delete($content_block);
 
-        return response()->json([
-            'message' => 'Content block deleted successfully.',
-        ]);
+        return ApiResponse::message('Content block deleted successfully.');
     }
 }

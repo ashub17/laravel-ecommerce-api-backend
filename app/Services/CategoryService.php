@@ -29,6 +29,24 @@ class CategoryService
         return $this->categoryRepository->update($category, $data);
     }
 
+    /**
+     * Categories are soft deleted, so their products would survive but be
+     * orphaned behind a hidden parent. Refuse the delete instead and let the
+     * admin move or remove the products first.
+     */
+    public function delete(Category $category): bool
+    {
+        if ($category->products()->exists()) {
+            abort(422, 'Cannot delete category because it has products assigned to it.');
+        }
+
+        if ($category->children()->exists()) {
+            abort(422, 'Cannot delete category because it has child categories.');
+        }
+
+        return $this->categoryRepository->delete($category);
+    }
+
     protected function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
         $baseSlug = Str::slug($name);

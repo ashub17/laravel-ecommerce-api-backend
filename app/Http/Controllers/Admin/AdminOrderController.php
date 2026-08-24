@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateOrderStatusRequest;
+use App\Http\Resources\OrderResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
@@ -22,29 +24,20 @@ class AdminOrderController extends Controller
 
         $orders = $this->orderService->getAdminOrders($perPage);
 
-        return response()->json([
-            'message' => 'Admin orders fetched successfully.',
-            'data' => $orders,
-        ]);
+        return ApiResponse::paginated($orders, OrderResource::class, 'Admin orders fetched successfully.');
     }
 
     public function show(int $id): JsonResponse
     {
         $order = $this->orderService->getAdminOrder($id);
 
-        return response()->json([
-            'message' => 'Admin order fetched successfully.',
-            'data' => $order,
-        ]);
+        return ApiResponse::item(new OrderResource($order), 'Admin order fetched successfully.');
     }
 
     public function update(UpdateOrderStatusRequest $request, Order $order): JsonResponse
     {
         $order = $this->orderService->updateAdminOrderStatus($order, $request->validated());
 
-        return response()->json([
-            'message' => 'Order updated successfully.',
-            'data' => $order,
-        ]);
+        return ApiResponse::item(new OrderResource($order), 'Order updated successfully.');
     }
 }

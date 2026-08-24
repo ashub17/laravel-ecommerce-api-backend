@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Resources\OrderResource;
+use App\Http\Responses\ApiResponse;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,29 +23,20 @@ class OrderController extends Controller
 
         $orders = $this->orderService->getUserOrders($request->user(), $perPage);
 
-        return response()->json([
-            'message' => 'Orders fetched successfully.',
-            'data' => $orders,
-        ]);
+        return ApiResponse::paginated($orders, OrderResource::class, 'Orders fetched successfully.');
     }
 
     public function store(StoreOrderRequest $request): JsonResponse
     {
         $order = $this->orderService->checkout($request->user(), $request->validated());
 
-        return response()->json([
-            'message' => 'Order placed successfully.',
-            'data' => $order,
-        ], 201);
+        return ApiResponse::item(new OrderResource($order), 'Order placed successfully.', 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
         $order = $this->orderService->getUserOrder($request->user(), $id);
 
-        return response()->json([
-            'message' => 'Order fetched successfully.',
-            'data' => $order,
-        ]);
+        return ApiResponse::item(new OrderResource($order), 'Order fetched successfully.');
     }
 }

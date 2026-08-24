@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
+use App\Http\Responses\ApiResponse;
 use App\Repositories\CategoryRepository;
 use Illuminate\Http\JsonResponse;
 
@@ -17,8 +19,6 @@ class CategoryController extends Controller
     {
         $categories = $this->categoryRepository->getActive();
 
-        return response()->json([
-            'data' => $categories,
-        ]);
+        return ApiResponse::collection($categories, CategoryResource::class, 'Categories fetched successfully.');
     }
 }

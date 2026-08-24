@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Services\DashboardService;
 use Illuminate\Http\JsonResponse;
 
@@ -15,9 +16,9 @@ class AdminDashboardController extends Controller
 
     public function index(): JsonResponse
     {
-        return response()->json([
-            'message' => 'Dashboard data fetched successfully.',
-            'data' => $this->dashboardService->getDashboardData(),
-        ]);
+        return ApiResponse::raw(
+            $this->dashboardService->getDashboardData(),
+            'Dashboard data fetched successfully.'
+        );
     }
 }

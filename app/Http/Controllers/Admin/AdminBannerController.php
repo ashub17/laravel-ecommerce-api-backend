@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBannerRequest;
 use App\Http\Requests\UpdateBannerRequest;
+use App\Http\Resources\BannerResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Banner;
 use App\Repositories\BannerRepository;
 use App\Services\BannerService;
@@ -23,10 +25,11 @@ class AdminBannerController extends Controller
     {
         $perPage = (int) $request->integer('per_page', 15);
 
-        return response()->json([
-            'message' => 'Banners fetched successfully.',
-            'data' => $this->bannerRepository->paginate($perPage),
-        ]);
+        return ApiResponse::paginated(
+            $this->bannerRepository->paginate($perPage),
+            BannerResource::class,
+            'Banners fetched successfully.'
+        );
     }
 
     public function store(StoreBannerRequest $request): JsonResponse
@@ -39,18 +42,12 @@ class AdminBannerController extends Controller
 
         $banner = $this->bannerService->create($data);
 
-        return response()->json([
-            'message' => 'Banner created successfully.',
-            'data' => $banner,
-        ], 201);
+        return ApiResponse::item(new BannerResource($banner), 'Banner created successfully.', 201);
     }
 
     public function show(Banner $banner): JsonResponse
     {
-        return response()->json([
-            'message' => 'Banner fetched successfully.',
-            'data' => $banner,
-        ]);
+        return ApiResponse::item(new BannerResource($banner), 'Banner fetched successfully.');
     }
 
     public function update(UpdateBannerRequest $request, Banner $banner): JsonResponse
@@ -63,18 +60,13 @@ class AdminBannerController extends Controller
 
         $banner = $this->bannerService->update($banner, $data);
 
-        return response()->json([
-            'message' => 'Banner updated successfully.',
-            'data' => $banner,
-        ]);
+        return ApiResponse::item(new BannerResource($banner), 'Banner updated successfully.');
     }
 
     public function destroy(Banner $banner): JsonResponse
     {
         $this->bannerService->delete($banner);
 
-        return response()->json([
-            'message' => 'Banner deleted successfully.',
-        ]);
+        return ApiResponse::message('Banner deleted successfully.');
     }
 }

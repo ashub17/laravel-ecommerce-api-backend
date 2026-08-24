@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\ProductResource;
 use App\Repositories\DashboardRepository;
 
 class DashboardService
@@ -21,9 +23,20 @@ class DashboardService
                 'total_orders' => $this->dashboardRepository->getTotalOrders(),
                 'total_revenue' => $this->dashboardRepository->getTotalRevenue(),
             ],
-            'low_stock_products' => $this->dashboardRepository->getLowStockProducts(),
-            'recent_orders' => $this->dashboardRepository->getRecentOrders(),
-            'top_selling_products' => $this->dashboardRepository->getTopSellingProducts(),
+            'low_stock_products' => ProductResource::collection(
+                $this->dashboardRepository->getLowStockProducts()
+            )->resolve(),
+            'recent_orders' => OrderResource::collection(
+                $this->dashboardRepository->getRecentOrders()
+            )->resolve(),
+            'top_selling_products' => $this->dashboardRepository->getTopSellingProducts()
+                ->map(fn ($row) => [
+                    'product_id' => $row->product_id,
+                    'product_name' => $row->product_name,
+                    'total_quantity_sold' => (int) $row->total_quantity_sold,
+                    'total_sales' => (float) $row->total_sales,
+                ])
+                ->all(),
         ];
     }
 }

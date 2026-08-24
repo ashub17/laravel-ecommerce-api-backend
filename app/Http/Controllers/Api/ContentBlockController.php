@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ContentBlockResource;
+use App\Http\Responses\ApiResponse;
 use App\Repositories\ContentBlockRepository;
 use Illuminate\Http\JsonResponse;
 
@@ -15,10 +17,11 @@ class ContentBlockController extends Controller
 
     public function index(): JsonResponse
     {
-        return response()->json([
-            'message' => 'Active content blocks fetched successfully.',
-            'data' => $this->contentBlockRepository->getActive(),
-        ]);
+        return ApiResponse::collection(
+            $this->contentBlockRepository->getActive(),
+            ContentBlockResource::class,
+            'Active content blocks fetched successfully.'
+        );
     }
 
     public function show(string $key): JsonResponse
@@ -26,14 +29,12 @@ class ContentBlockController extends Controller
         $contentBlock = $this->contentBlockRepository->findActiveByKey($key);
 
         if (!$contentBlock) {
-            return response()->json([
-                'message' => 'Content block not found.',
-            ], 404);
+            abort(404, 'Content block not found.');
         }
 
-        return response()->json([
-            'message' => 'Content block fetched successfully.',
-            'data' => $contentBlock,
-        ]);
+        return ApiResponse::item(
+            new ContentBlockResource($contentBlock),
+            'Content block fetched successfully.'
+        );
     }
 }

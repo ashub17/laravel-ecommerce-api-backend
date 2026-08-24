@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,10 +25,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user->load('roles'),
-            'token' => $token,
-        ], 201);
+        return $this->respondWithToken($user, $token, 'Registered successfully.', 201);
     }
 
     public function login(Request $request): JsonResponse
@@ -47,15 +45,15 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user->load('roles'),
-            'token' => $token,
-        ]);
+        return $this->respondWithToken($user, $token, 'Logged in successfully.');
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json($request->user()->load('roles'));
+        return response()->json([
+            'message' => 'User fetched successfully.',
+            'data' => (new UserResource($request->user()->load('roles')))->resolve(),
+        ]);
     }
 
     public function logout(Request $request): JsonResponse
@@ -64,6 +62,21 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logged out successfully.',
+            'data' => null,
         ]);
+    }
+
+    /**
+     * Auth responses carry the token alongside the user, so they extend the
+     * standard envelope with a sibling `token` key rather than burying it in
+     * `data`.
+     */
+    protected function respondWithToken(User $user, string $token, string $message, int $status = 200): JsonResponse
+    {
+        return response()->json([
+            'message' => $message,
+            'data' => (new UserResource($user->load('roles')))->resolve(),
+            'token' => $token,
+        ], $status);
     }
 }

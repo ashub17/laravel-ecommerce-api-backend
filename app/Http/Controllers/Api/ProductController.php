@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
+use App\Http\Responses\ApiResponse;
 use App\Repositories\ProductRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,7 +31,7 @@ class ProductController extends Controller
 
         $products = $this->productRepository->publicPaginate($filters, $perPage);
 
-        return response()->json($products);
+        return ApiResponse::paginated($products, ProductResource::class, 'Products fetched successfully.');
     }
 
     public function show(string $slug): JsonResponse
@@ -37,13 +39,9 @@ class ProductController extends Controller
         $product = $this->productRepository->findBySlug($slug);
 
         if (!$product) {
-            return response()->json([
-                'message' => 'Product not found.',
-            ], 404);
+            abort(404, 'Product not found.');
         }
 
-        return response()->json([
-            'data' => $product,
-        ]);
+        return ApiResponse::item(new ProductResource($product), 'Product fetched successfully.');
     }
 }
