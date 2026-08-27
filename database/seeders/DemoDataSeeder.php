@@ -174,7 +174,7 @@ class DemoDataSeeder extends Seeder
             [
                 'key' => 'about-us',
                 'title' => 'About this store',
-                'content' => 'A demo storefront built on Laravel and Vue. Replace this copy with your own.',
+                'content' => 'A demo storefront built on Laravel and Next.js. Replace this copy with your own.',
             ],
         ] as $block) {
             ContentBlock::firstOrCreate(['key' => $block['key']], $block + ['is_active' => true]);

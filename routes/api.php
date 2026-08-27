@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\ContentBlockController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\CartTotalsController;
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
@@ -54,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/{id}', [CartController::class, 'destroy']);
     Route::delete('/cart', [CartController::class, 'clear']);
     Route::post('/cart/merge', [CartController::class, 'merge']);
+    Route::get('/cart/totals', CartTotalsController::class);
 
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
