@@ -114,6 +114,88 @@ class CartService
         });
     }
 
+    /**
+     * Folds a guest's client-side cart into their server cart at sign-in.
+     *
+     * Deliberately tolerant: a merge that rejected the whole basket because
+     * one product sold out while the guest was browsing would lose the rest of
+     * their cart. Unavailable lines are skipped and over-stock lines are
+     * clamped, and both are reported back so the UI can say what changed.
+     *
+     * Quantities are summed with anything already in the server cart, matching
+     * what a customer expects when they had items on two devices.
+     *
+     * @param  array<int, array{product_id: int, quantity: int}>  $items
+     * @return array{cart: Cart, adjustments: array<int, array<string, mixed>>}
+     */
+    public function merge(User $user, array $items): array
+    {
+        return DB::transaction(function () use ($user, $items) {
+            $cart = $this->cartRepository->getOrCreateForUser($user);
+            $adjustments = [];
+
+            foreach ($items as $line) {
+                $productId = (int) ($line['product_id'] ?? 0);
+                $quantity = max(1, (int) ($line['quantity'] ?? 1));
+
+                $product = Product::query()
+                    ->where('id', $productId)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (!$product) {
+                    $adjustments[] = [
+                        'product_id' => $productId,
+                        'reason' => 'unavailable',
+                        'message' => 'This product is no longer available.',
+                    ];
+
+                    continue;
+                }
+
+                $existing = $this->cartRepository->findCartItemByProduct($cart, $product->id);
+                $requested = ($existing?->quantity ?? 0) + $quantity;
+                $granted = min($requested, $product->stock_quantity);
+
+                if ($granted < 1) {
+                    $adjustments[] = [
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'reason' => 'out_of_stock',
+                        'message' => "{$product->name} is out of stock.",
+                    ];
+
+                    continue;
+                }
+
+                if ($granted < $requested) {
+                    $adjustments[] = [
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'reason' => 'quantity_reduced',
+                        'requested' => $requested,
+                        'granted' => $granted,
+                        'message' => "Only {$granted} of {$product->name} remain, so the quantity was reduced.",
+                    ];
+                }
+
+                $payload = ['quantity' => $granted, 'price' => $product->current_price];
+
+                $existing
+                    ? $this->cartRepository->updateCartItem($existing, $payload)
+                    : $this->cartRepository->createCartItem($payload + [
+                        'cart_id' => $cart->id,
+                        'product_id' => $product->id,
+                    ]);
+            }
+
+            return [
+                'cart' => $this->cartRepository->findUserCartWithItems($user),
+                'adjustments' => $adjustments,
+            ];
+        });
+    }
+
     public function clear(User $user): Cart
     {
         return DB::transaction(function () use ($user) {

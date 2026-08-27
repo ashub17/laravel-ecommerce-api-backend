@@ -36,7 +36,11 @@ class AdminOrderController extends Controller
 
     public function update(UpdateOrderStatusRequest $request, Order $order): JsonResponse
     {
-        $order = $this->orderService->updateAdminOrderStatus($order, $request->validated());
+        $order = $this->orderService->applyStatusChange(
+            $order,
+            $request->validated(),
+            $request->user()
+        );
 
         return ApiResponse::item(new OrderResource($order), 'Order updated successfully.');
     }

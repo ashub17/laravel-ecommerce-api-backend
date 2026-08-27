@@ -8,6 +8,19 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class OrderRepository
 {
+    /**
+     * Relations every order response is built from.
+     *
+     * @var array<int, string>
+     */
+    protected array $with = [
+        'items.product',
+        'shippingAddress',
+        'billingAddress',
+        'statusHistories.user',
+        'payments',
+    ];
+
     public function create(array $data): Order
     {
         return Order::create($data);
@@ -24,7 +37,7 @@ class OrderRepository
     {
         return Order::query()
             ->where('user_id', $user->id)
-            ->with(['items.product', 'shippingAddress', 'billingAddress'])
+            ->with($this->with)
             ->latest()
             ->paginate($perPage);
     }
@@ -33,14 +46,26 @@ class OrderRepository
     {
         return Order::query()
             ->where('user_id', $user->id)
-            ->with(['items.product', 'shippingAddress', 'billingAddress'])
+            ->with($this->with)
+            ->find($orderId);
+    }
+
+    /**
+     * Selects a customer's order for update so two concurrent cancellations
+     * cannot both pass the guard and restock the same items.
+     */
+    public function lockForUpdate(User $user, int $orderId): ?Order
+    {
+        return Order::query()
+            ->where('user_id', $user->id)
+            ->lockForUpdate()
             ->find($orderId);
     }
 
     public function paginateForAdmin(int $perPage = 15): LengthAwarePaginator
     {
         return Order::query()
-            ->with(['user', 'items.product', 'shippingAddress', 'billingAddress'])
+            ->with([...$this->with, 'user'])
             ->latest()
             ->paginate($perPage);
     }
@@ -48,7 +73,7 @@ class OrderRepository
     public function findForAdmin(int $orderId): ?Order
     {
         return Order::query()
-            ->with(['user', 'items.product', 'shippingAddress', 'billingAddress'])
+            ->with([...$this->with, 'user'])
             ->find($orderId);
     }
 }

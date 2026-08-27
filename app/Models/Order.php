@@ -21,6 +21,8 @@ class Order extends Model
         'total',
         'status',
         'payment_status',
+        'payment_method',
+        'stock_restored_at',
         'shipping_address_id',
         'billing_address_id',
     ];
@@ -30,6 +32,7 @@ class Order extends Model
         'tax' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
         'total' => 'decimal:2',
+        'stock_restored_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -40,6 +43,21 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(OrderStatusHistory::class)->oldest();
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->latest();
+    }
+
+    public function isCancellable(): bool
+    {
+        return in_array($this->status, config('commerce.orders.cancellable_from', ['pending']), true);
     }
 
     public function shippingAddress(): BelongsTo

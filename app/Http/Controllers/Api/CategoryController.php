@@ -7,6 +7,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Responses\ApiResponse;
 use App\Repositories\CategoryRepository;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -15,9 +16,15 @@ class CategoryController extends Controller
     ) {
     }
 
-    public function index(): JsonResponse
+    /**
+     * Pass ?tree=1 for categories nested under their parents; the default
+     * stays a flat list so existing clients are unaffected.
+     */
+    public function index(Request $request): JsonResponse
     {
-        $categories = $this->categoryRepository->getActive();
+        $categories = $request->boolean('tree')
+            ? $this->categoryRepository->getActiveTree()
+            : $this->categoryRepository->getActive();
 
         return ApiResponse::collection($categories, CategoryResource::class, 'Categories fetched successfully.');
     }

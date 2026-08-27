@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | Where the single page application lives. Password reset and email
+    | verification links are built against this, since those journeys finish
+    | in the SPA rather than on a Blade page served by the API.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

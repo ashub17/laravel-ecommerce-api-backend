@@ -119,6 +119,7 @@ class DemoDataSeeder extends Seeder
                 [
                     'name' => $data['name'],
                     'password' => Hash::make('password123'),
+                    'email_verified_at' => now(),
                 ]
             );
 

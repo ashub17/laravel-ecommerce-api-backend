@@ -21,6 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // This application serves no web login page. Without this, an
+        // unauthenticated request that does not send `Accept: application/json`
+        // makes Laravel try to redirect to route('login'), which does not
+        // exist, and the resulting RouteNotFoundException surfaces as a 500
+        // instead of a 401. Returning null keeps it an AuthenticationException
+        // so the JSON handler below renders the correct response.
+        $middleware->redirectGuestsTo(fn () => null);
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

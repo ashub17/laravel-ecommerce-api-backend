@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MergeCartRequest;
 use App\Http\Requests\StoreCartItemRequest;
 use App\Http\Requests\UpdateCartItemRequest;
 use App\Http\Resources\CartResource;
@@ -51,5 +52,21 @@ class CartController extends Controller
         $cart = $this->cartService->clear($request->user());
 
         return ApiResponse::item(new CartResource($cart), 'Cart cleared successfully.');
+    }
+
+    /**
+     * Folds a guest cart into the signed-in user's cart.
+     *
+     * Returns the cart alongside a list of anything that could not be honoured
+     * in full, so the response is a payload rather than a single resource.
+     */
+    public function merge(MergeCartRequest $request): JsonResponse
+    {
+        $result = $this->cartService->merge($request->user(), $request->validated()['items']);
+
+        return ApiResponse::raw([
+            'cart' => (new CartResource($result['cart']))->resolve(),
+            'adjustments' => $result['adjustments'],
+        ], 'Cart merged successfully.');
     }
 }

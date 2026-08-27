@@ -22,6 +22,7 @@ class AuthController extends Controller
 
         $user = User::create($validated);
         $user->assignRole('customer');
+        $user->sendEmailVerificationNotification();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

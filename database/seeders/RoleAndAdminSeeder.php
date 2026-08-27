@@ -19,6 +19,7 @@ class RoleAndAdminSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password123'),
+                'email_verified_at' => now(),
             ]
         );
 

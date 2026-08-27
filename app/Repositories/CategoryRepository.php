@@ -25,6 +25,42 @@ class CategoryRepository
             ->get();
     }
 
+    /**
+     * Active categories nested as a tree, roots first.
+     *
+     * Built in memory from one query rather than with a recursive eager load,
+     * so depth is unlimited and the database is touched exactly once.
+     */
+    public function getActiveTree(): Collection
+    {
+        $categories = Category::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $byId = $categories->keyBy('id');
+
+        foreach ($categories as $category) {
+            $category->setRelation('children', new Collection());
+        }
+
+        $roots = new Collection();
+
+        foreach ($categories as $category) {
+            $parent = $category->parent_id ? $byId->get($category->parent_id) : null;
+
+            if ($parent) {
+                $parent->children->push($category);
+            } else {
+                // A child whose parent is inactive would otherwise vanish, so
+                // it is promoted to a root rather than dropped.
+                $roots->push($category);
+            }
+        }
+
+        return $roots;
+    }
+
     public function findById(int $id): ?Category
     {
         return Category::query()
