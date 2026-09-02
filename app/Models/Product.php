@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Media;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -62,10 +63,6 @@ class Product extends Model
 
     public function getFeaturedImageUrlAttribute(): ?string
     {
-        if (!$this->featured_image) {
-            return null;
-        }
-
-        return asset('storage/' . $this->featured_image);
+        return Media::url($this->featured_image);
     }
 }

@@ -1,0 +1,110 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Import this from the Render dashboard (New > Blueprint) and it creates the
+# API service with the right settings. Secrets are marked sync:false so Render
+# prompts for them rather than storing them in git.
+services:
+  - type: web
+    name: ecommerce-api
+    runtime: docker
+    plan: free
+    region: singapore          # closest free region to Bangladesh; adjust
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+
+    envVars:
+      - key: APP_NAME
+        value: Aurora
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+
+      # php artisan key:generate --show
+      - key: APP_KEY
+        sync: false
+      # The service's own https URL, e.g. https://ecommerce-api.onrender.com
+      - key: APP_URL
+        sync: false
+
+      # --- database (external: TiDB Cloud / Aiven / Clever Cloud) ---
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+
+      # --- object storage for product images (Cloudflare R2) ---
+      # The container's disk is ephemeral: anything uploaded to the local
+      # public disk disappears on the next deploy.
+      - key: FILESYSTEM_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_URL
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "true"
+
+      # --- runtime ---
+      # No always-on worker on the free plan, so queued mail is sent inline.
+      # Requests that send email are slower; nothing is dropped.
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: CACHE_STORE
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+
+      # --- front ends ---
+      # Only the admin panel calls the API from a browser; the storefront talks
+      # to it server-side, so it needs no CORS entry.
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+      # --- commerce ---
+      - key: COMMERCE_CURRENCY
+        value: USD
+      - key: COMMERCE_TAX_RATE
+        value: "0.08"
+      - key: COMMERCE_SHIPPING_FLAT_FEE
+        value: "5.99"
+      - key: COMMERCE_SHIPPING_FREE_OVER
+        value: "75"
+      - key: COMMERCE_PAYMENT_GATEWAY
+        value: mock
+      - key: MOCK_GATEWAY_WEBHOOK_SECRET
+        sync: false
+
+      # --- mail ---
+      # `log` writes to the container log instead of sending. Swap for real
+      # SMTP credentials when you want mail to leave the building.
+      - key: MAIL_MAILER
+        value: log
+
+      # --- boot behaviour ---
+      # Migrations run on every boot. Set RUN_SEEDERS=true for the first deploy
+      # only, then remove it — DatabaseSeeder skips demo data in production, so
+      # it seeds roles and the admin account and nothing else.
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: RUN_SEEDERS
+        value: "false"

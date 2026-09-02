@@ -1,0 +1,30 @@
+# Wasmer Edge manifest for the Laravel API.
+#
+# An alternative to the Render Dockerfile in this repo — pick one. The reason
+# to prefer Wasmer is that it does not sleep, so the storefront never has to
+# render a page against a backend that is still waking up.
+#
+# Layout follows https://docs.wasmer.io/edge/guides/laravel/
+#
+# Test locally with `wasmer run .` (serves on http://localhost:8080), then
+# `wasmer deploy`.
+
+[dependencies]
+# Pinned deliberately. Laravel 12 requires PHP ^8.2, and an unpinned runtime
+# could move under the app without warning.
+"php/php" = "=8.3.4"
+
+[fs]
+# The project root is mounted at /app, so every absolute path inside the
+# container is /app/... — see the note about cached config in DEPLOYMENT.md.
+"/app/" = "."
+
+[[command]]
+name = "run"
+module = "php/php:php"
+runner = "wasi"
+
+[command.annotations.wasi]
+# Laravel's front controller lives in public/, so that is the document root.
+# Everything above it stays unreachable over HTTP.
+main-args = ["-t", "/app/public", "-S", "localhost:8080"]

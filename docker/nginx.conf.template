@@ -1,0 +1,62 @@
+# Rendered at boot by entrypoint.sh so ${PORT} becomes Render's assigned port.
+user www-data;
+worker_processes auto;
+error_log /dev/stderr warn;
+pid /run/nginx.pid;
+
+events { worker_connections 1024; }
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # Logs go to the container's stdout so Render captures them.
+    access_log /dev/stdout;
+
+    sendfile      on;
+    tcp_nopush    on;
+    keepalive_timeout 65;
+
+    # Render terminates TLS at its edge, so the app only ever sees http here.
+    # These headers carry the original scheme through to Laravel.
+    server_tokens off;
+
+    gzip on;
+    gzip_types application/json text/css application/javascript image/svg+xml;
+    gzip_min_length 1024;
+
+    server {
+        listen ${PORT};
+        server_name _;
+        root /var/www/html/public;
+        index index.php;
+
+        charset utf-8;
+        client_max_body_size 10M;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # Health check target for Render — answered without touching PHP.
+        location = /healthz {
+            access_log off;
+            add_header Content-Type text/plain;
+            return 200 'ok';
+        }
+
+        location ~ \.php$ {
+            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param HTTPS $http_x_forwarded_proto;
+            fastcgi_read_timeout 60s;
+        }
+
+        # Never serve dotfiles.
+        location ~ /\.(?!well-known).* {
+            deny all;
+        }
+    }
+}

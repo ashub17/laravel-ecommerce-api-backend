@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Media;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,10 +32,6 @@ class ProductImage extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image_path) {
-            return null;
-        }
-
-        return asset('storage/' . $this->image_path);
+        return Media::url($this->image_path);
     }
 }

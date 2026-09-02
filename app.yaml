@@ -1,0 +1,22 @@
+# Wasmer Edge app configuration.
+#
+# `wasmer deploy` fills in `name` and `owner` on the first run and rewrites
+# this file, so leave those to the CLI rather than guessing an app name that
+# is already taken.
+
+package: .
+
+scaling:
+  # One worker per thread. PHP's built-in server is single-threaded, so this
+  # lets Edge scale by adding instances rather than assuming concurrency the
+  # runtime does not have.
+  mode: single_concurrency
+
+capabilities:
+  instaboot:
+    # Pre-warms a snapshot by hitting these paths at build time, so the first
+    # real visitor does not pay for bootstrapping Laravel.
+    requests:
+      - path: /up
+      - path: /api/products
+      - path: /api/categories
